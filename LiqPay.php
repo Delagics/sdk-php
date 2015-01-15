@@ -21,6 +21,8 @@
  *
  */
 
+namespace delagics\liqpay;
+
 /**
  * Payment method liqpay process
  *
