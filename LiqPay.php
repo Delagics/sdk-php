@@ -9,7 +9,7 @@
  * http://opensource.org/licenses/osl-3.0.php
  *
  * @category        LiqPay
- * @package         delagics/liqpay
+ * @package         blackwolfinsane/liqpay
  * @version         3.0
  * @author          Liqpay
  * @copyright       Copyright (c) 2014 Liqpay

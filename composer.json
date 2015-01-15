@@ -1,5 +1,5 @@
 {
-    "name":"liqpay/liqpay",
+    "name":"blackwolfinsane/liqpay",
     "type": "library",
     "description": "SDK for Liqpay",
     "keywords": ["liqpay","pay"],
