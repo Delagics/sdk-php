@@ -22,13 +22,14 @@
  */
 
 namespace delagics\liqpay;
-
+use yii\widgets\InputWidget;
+use Yii;
 /**
  * Payment method liqpay process
  *
  * @author      Liqpay <support@liqpay.com>
  */
-class LiqPay
+class LiqPay extends InputWidget
 {
 
     private $_api_url = 'https://www.liqpay.com/api/';
