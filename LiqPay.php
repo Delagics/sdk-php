@@ -9,7 +9,7 @@
  * http://opensource.org/licenses/osl-3.0.php
  *
  * @category        LiqPay
- * @package         liqpay/liqpay
+ * @package         delagics/liqpay
  * @version         3.0
  * @author          Liqpay
  * @copyright       Copyright (c) 2014 Liqpay
@@ -41,7 +41,7 @@ class LiqPay
      *
      * @param string $public_key
      * @param string $private_key
-     * 
+     *
      * @throws InvalidArgumentException
      */
     public function __construct($public_key, $private_key)
@@ -74,7 +74,7 @@ class LiqPay
         }
         $url         = $this->_api_url . $path;
         $public_key  = $this->_public_key;
-        $private_key = $this->_private_key;        
+        $private_key = $this->_private_key;
         $data        = base64_encode(json_encode(array_merge(compact('public_key'), $params)));
         $signature   = base64_encode(sha1($private_key.$data.$private_key, 1));
         $postfields  = http_build_query(array(
@@ -100,11 +100,11 @@ class LiqPay
      * @param array $params
      *
      * @return string
-     * 
+     *
      * @throws InvalidArgumentException
      */
     public function cnb_form($params)
-    {        
+    {
 
          $language = 'ru';
         if (isset($params['language']) && $params['language'] == 'en') {
@@ -115,7 +115,7 @@ class LiqPay
         $params    = $this->cnb_params($params);
         $data      = base64_encode( json_encode($params) );
         $signature = $this->cnb_signature($params);
-        
+
         return sprintf('
             <form method="POST" action="%s" accept-charset="utf-8">
                 %s
@@ -166,7 +166,7 @@ class LiqPay
      */
     private function cnb_params($params)
     {
-        
+
         $params['public_key'] = $this->_public_key;
 
         if (!isset($params['version'])) {
