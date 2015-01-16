@@ -22,6 +22,7 @@
  */
 
 namespace delagics\liqpay;
+
 use yii\widgets\InputWidget;
 use Yii;
 /**
@@ -109,7 +110,7 @@ class LiqPay extends InputWidget
     public function cnb_form($params)
     {
 
-         $language = 'ru';
+        $language = 'ru';
         if (isset($params['language']) && $params['language'] == 'en') {
             $language = 'en';
         }
