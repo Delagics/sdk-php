@@ -25,6 +25,7 @@ namespace delagics\liqpay;
 
 use yii\widgets\InputWidget;
 use Yii;
+
 /**
  * Payment method liqpay process
  *
@@ -32,13 +33,13 @@ use Yii;
  */
 class LiqPay extends InputWidget
 {
+    const SUPPORT_VERSION = 3;
 
     private $_api_url = 'https://www.liqpay.com/api/';
     private $_checkout_url = 'https://www.liqpay.com/api/checkout';
-    protected $_supportedCurrencies = array('EUR','UAH','USD','RUB','RUR');
+    protected $_supportedCurrencies = array('EUR','UAH','USD','RUB');
     private $_public_key;
     private $_private_key;
-
 
     /**
      * Constructor.
@@ -50,18 +51,15 @@ class LiqPay extends InputWidget
      */
     public function __construct($public_key, $private_key)
     {
-        if (empty($public_key)) {
+        if (empty($public_key))
             throw new InvalidArgumentException('public_key is empty');
-        }
 
-        if (empty($private_key)) {
+        if (empty($private_key))
             throw new InvalidArgumentException('private_key is empty');
-        }
 
         $this->_public_key = $public_key;
         $this->_private_key = $private_key;
     }
-
 
     /**
      * Call API
@@ -73,9 +71,9 @@ class LiqPay extends InputWidget
      */
     public function api($path, $params = array())
     {
-        if(!isset($params['version'])){
+        if(!isset($params['version']))
             throw new InvalidArgumentException('version is null');
-        }
+
         $url         = $this->_api_url . $path;
         $public_key  = $this->_public_key;
         $private_key = $this->_private_key;
@@ -97,7 +95,6 @@ class LiqPay extends InputWidget
         return json_decode($server_output);
     }
 
-
     /**
      * cnb_form
      *
@@ -109,11 +106,9 @@ class LiqPay extends InputWidget
      */
     public function cnb_form($params)
     {
-
         $language = 'ru';
-        if (isset($params['language']) && $params['language'] == 'en') {
+        if (isset($params['language']) && $params['language'] == 'en')
             $language = 'en';
-        }
 
         $private_key = $this->_private_key;
         $params    = $this->cnb_params($params);
@@ -121,7 +116,7 @@ class LiqPay extends InputWidget
         $signature = $this->cnb_signature($params);
 
         return sprintf('
-            <form method="POST" action="%s" accept-charset="utf-8">
+            <form method="POST" action="%s" accept-charset="utf-8" id="">
                 %s
                 %s
                 <input type="image" src="//static.liqpay.com/buttons/p1%s.radius.png" name="btn_text" />
@@ -134,11 +129,11 @@ class LiqPay extends InputWidget
         );
     }
 
-
-
-
-
-
+/*    public function autoSubmit($formId, $timeout = 1000)
+    {
+        return "<script>setTimeout(function(){
+            document.getElementById(\"$formId\").submit();}, $timeout);</script>";
+    }*/
 
     /**
      * cnb_signature
@@ -158,9 +153,6 @@ class LiqPay extends InputWidget
         return $signature;
     }
 
-
-
-
     /**
      * cnb_params
      *
@@ -170,31 +162,21 @@ class LiqPay extends InputWidget
      */
     private function cnb_params($params)
     {
-
         $params['public_key'] = $this->_public_key;
 
-        if (!isset($params['version'])) {
-            throw new InvalidArgumentException('version is null');
-        }
-        if (!isset($params['amount'])) {
-            throw new InvalidArgumentException('amount is null');
-        }
-        if (!isset($params['currency'])) {
-           throw new InvalidArgumentException('currency is null');
-        }
-        if (!in_array($params['currency'], $this->_supportedCurrencies)) {
-            throw new InvalidArgumentException('currency is not supported');
-        }
-        if ($params['currency'] == 'RUR') {
-            $params['currency'] = 'RUB';
-        }
-        if (!isset($params['description'])) {
-            throw new InvalidArgumentException('description is null');
-        }
+        if (!isset($params['version']))
+            throw new InvalidArgumentException('Version is null');
+        if (!isset($params['amount']))
+            throw new InvalidArgumentException('Amount is null');
+        if (!isset($params['currency']))
+           throw new InvalidArgumentException('Currency is null');
+        if (!in_array($params['currency'], $this->_supportedCurrencies))
+            throw new InvalidArgumentException('Currency is not supported');
+        if (!isset($params['description']))
+            throw new InvalidArgumentException('Description is null');
 
         return $params;
     }
-
 
     /**
      * str_to_sign
@@ -205,7 +187,6 @@ class LiqPay extends InputWidget
      */
     public function str_to_sign($str)
     {
-
         $signature = base64_encode(sha1($str,1));
 
         return $signature;
