@@ -24,6 +24,7 @@
 namespace delagics\liqpay;
 
 use yii\widgets\InputWidget;
+use yii\helpers\Html;
 use Yii;
 
 /**
@@ -34,10 +35,12 @@ use Yii;
 class LiqPay extends InputWidget
 {
     const SUPPORT_VERSION = 3;
+    const DEFAULT_LANG = 'en';
 
     private $_api_url = 'https://www.liqpay.com/api/';
     private $_checkout_url = 'https://www.liqpay.com/api/checkout';
-    protected $_supportedCurrencies = array('EUR','UAH','USD','RUB');
+    protected $_supportedCurrencies = ['EUR','UAH','USD','RUB'];
+    protected $_supportedLangs = ['en', 'ru'];
     private $_public_key;
     private $_private_key;
 
@@ -52,10 +55,10 @@ class LiqPay extends InputWidget
     public function __construct($public_key, $private_key)
     {
         if (empty($public_key))
-            throw new InvalidArgumentException('public_key is empty');
+            throw new \InvalidArgumentException('LiqPay: Public key is empty');
 
         if (empty($private_key))
-            throw new InvalidArgumentException('private_key is empty');
+            throw new \InvalidArgumentException('LiqPay: Private key is empty');
 
         $this->_public_key = $public_key;
         $this->_private_key = $private_key;
@@ -72,7 +75,7 @@ class LiqPay extends InputWidget
     public function api($path, $params = array())
     {
         if(!isset($params['version']))
-            throw new InvalidArgumentException('version is null');
+            throw new \InvalidArgumentException('LiqPay: Version is null');
 
         $url         = $this->_api_url . $path;
         $public_key  = $this->_public_key;
@@ -104,36 +107,36 @@ class LiqPay extends InputWidget
      *
      * @throws InvalidArgumentException
      */
-    public function cnb_form($params)
+    public function cnb_form($params, $formId = '', $autosubmit = false, $liqpayBtnNum = 11)
     {
-        $language = 'ru';
-        if (isset($params['language']) && $params['language'] == 'en')
-            $language = 'en';
 
-        $private_key = $this->_private_key;
-        $params    = $this->cnb_params($params);
-        $data      = base64_encode( json_encode($params) );
-        $signature = $this->cnb_signature($params);
+        if (isset($params['language']) && in_array($params['language'], $this->_supportedLangs))
+            $lang = $params['language'];
+        elseif(isset($params['language']) && !in_array($params['language'], $this->_supportedLangs))
+            throw new \InvalidArgumentException('LiqPay: Language is not supported');
+        else
+            $lang = $params['language'] = self::DEFAULT_LANG;
 
-        return sprintf('
-            <form method="POST" action="%s" accept-charset="utf-8" id="">
-                %s
-                %s
-                <input type="image" src="//static.liqpay.com/buttons/p1%s.radius.png" name="btn_text" />
-            </form>
-            ',
-            $this->_checkout_url,
-            sprintf('<input type="hidden" name="%s" value="%s" />', 'data', $data),
-            sprintf('<input type="hidden" name="%s" value="%s" />', 'signature', $signature),
-            $language
-        );
+        $params = $this->cnb_params($params);
+
+        $form =
+            Html::beginForm($this->_checkout_url, 'post', ['accept-charset' => 'utf-8', 'id'=>$formId]).
+            Html::hiddenInput('data', base64_encode(json_encode($params))).
+            Html::hiddenInput('signature', $this->cnb_signature($params)).
+            (
+                $autosubmit ?
+                $this->autoSubmit($formId) :
+                Html::input('image', 'btn_text', null, ['src'=>'//static.liqpay.com/buttons/p'.$liqpayBtnNum.$lang.'.radius.png'])
+            ).
+            Html::endForm();
+        return $form;
     }
 
-/*    public function autoSubmit($formId, $timeout = 1000)
+    public function autoSubmit($formId, $timeout = 1000)
     {
-        return "<script>setTimeout(function(){
-            document.getElementById(\"$formId\").submit();}, $timeout);</script>";
-    }*/
+        return Html::script("setTimeout(function(){
+            document.getElementById(\"$formId\").submit();}, $timeout);");
+    }
 
     /**
      * cnb_signature
@@ -144,10 +147,10 @@ class LiqPay extends InputWidget
      */
     public function cnb_signature($params)
     {
-        $params      = $this->cnb_params($params);
+        $params = $this->cnb_params($params);
         $private_key = $this->_private_key;
 
-        $json      = base64_encode( json_encode($params) );
+        $json = base64_encode( json_encode($params) );
         $signature = $this->str_to_sign($private_key . $json . $private_key);
 
         return $signature;
@@ -165,15 +168,15 @@ class LiqPay extends InputWidget
         $params['public_key'] = $this->_public_key;
 
         if (!isset($params['version']))
-            throw new InvalidArgumentException('Version is null');
+            throw new \InvalidArgumentException('LiqPay: Version is null');
         if (!isset($params['amount']))
-            throw new InvalidArgumentException('Amount is null');
+            throw new \InvalidArgumentException('LiqPay: Amount is null');
         if (!isset($params['currency']))
-           throw new InvalidArgumentException('Currency is null');
+           throw new \InvalidArgumentException('LiqPay: Currency is null');
         if (!in_array($params['currency'], $this->_supportedCurrencies))
-            throw new InvalidArgumentException('Currency is not supported');
+            throw new \InvalidArgumentException('LiqPay: Currency is not supported');
         if (!isset($params['description']))
-            throw new InvalidArgumentException('Description is null');
+            throw new \InvalidArgumentException('LiqPay: Description is null');
 
         return $params;
     }
