@@ -1,4 +1,4 @@
-sdk-php
+Yii 2 LiqPay
 =======
 
 LiqPay SDK-PHP
