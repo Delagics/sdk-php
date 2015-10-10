@@ -22,10 +22,5 @@
         "psr-4": {
             "delagics\\liqpay\\": ""
         }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.0.x-dev"
-        }
     }
 }
